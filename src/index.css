@@ -1399,18 +1399,18 @@ tbody tr:last-child td {
     grid-template-columns: 1fr;
   }
 
-  /* Modal: bottom sheet style on mobile */
+  /* Modal: center on mobile instead of bottom sheet */
   .modal-overlay {
-    padding: 0;
-    align-items: flex-end;
+    padding: 1rem;
+    align-items: center;
   }
 
   .modal {
     max-width: 100%;
     max-height: 90vh;
     max-height: 90dvh;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    animation: slideUpMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    border-radius: var(--radius-lg);
+    animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   .modal-header {
@@ -1573,11 +1573,14 @@ tbody tr:last-child td {
   .modal {
     max-height: 100vh;
     max-height: 100dvh;
+    height: 100vh;
+    height: 100dvh;
     border-radius: 0;
   }
 
   .modal-overlay {
     padding: 0;
+    align-items: flex-start;
   }
 
   /* Toast */
