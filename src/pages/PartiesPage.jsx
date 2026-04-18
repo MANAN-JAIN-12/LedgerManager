@@ -377,7 +377,7 @@ export default function PartiesPage() {
                 <X size={18} />
               </button>
             </div>
-            <form onSubmit={handleSubmitForm}>
+            <form onSubmit={handleSubmitForm} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
               <div className="modal-body">
                 {formError && (
                   <div className="login-error" style={{ marginBottom: '1rem' }}>{formError}</div>

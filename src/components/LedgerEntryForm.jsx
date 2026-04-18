@@ -15,6 +15,7 @@ export default function LedgerEntryForm({
   const [weight, setWeight] = useState('');
   const [touch, setTouch] = useState('');
   const [amount, setAmount] = useState('');
+  const [notes, setNotes] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -36,6 +37,7 @@ export default function LedgerEntryForm({
       setWeight(editData.weight?.toString() || '');
       setTouch(editData.touch?.toString() || '');
       setAmount(editData.amount?.toString() || '');
+      setNotes(editData.notes || '');
     } else {
       // Default for new entry
       setFormType('issue');
@@ -45,6 +47,7 @@ export default function LedgerEntryForm({
       setWeight('');
       setTouch('');
       setAmount('');
+      setNotes('');
     }
     setError('');
   }, [editData, isOpen]);
@@ -92,6 +95,7 @@ export default function LedgerEntryForm({
         touch: formType !== 'payment' ? parseFloat(touch) : null,
         fine: formType !== 'payment' ? parseFloat(finePreview) : null,
         amount: formType === 'payment' ? parseFloat(amount) : null,
+        notes: notes.trim() || null,
       };
 
       await onSubmit(entry);
@@ -115,7 +119,7 @@ export default function LedgerEntryForm({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
           <div className="modal-body">
             {error && <div className="login-error" style={{ marginBottom: '1rem' }}>{error}</div>}
 
@@ -280,6 +284,23 @@ export default function LedgerEntryForm({
                   </div>
                 </>
               )}
+            </div>
+
+            {/* Notes */}
+            <div className="form-group full-width">
+              <label htmlFor="entry-notes">Notes</label>
+              <textarea
+                id="entry-notes"
+                placeholder="Add any notes (optional)"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                rows={2}
+                style={{
+                  resize: 'vertical',
+                  minHeight: '2.5rem',
+                  fontFamily: 'inherit',
+                }}
+              />
             </div>
           </div>
 
