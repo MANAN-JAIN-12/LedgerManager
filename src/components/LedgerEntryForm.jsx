@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 
 export default function LedgerEntryForm({
   isOpen,
@@ -16,10 +18,13 @@ export default function LedgerEntryForm({
   const [touch, setTouch] = useState('');
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
+  const [photoPaths, setPhotoPaths] = useState([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const partyInputRef = useRef(null);
+  const { user } = useAuth();
 
   // Calculate fine preview
   const finePreview =
@@ -37,7 +42,24 @@ export default function LedgerEntryForm({
       setWeight(editData.weight?.toString() || '');
       setTouch(editData.touch?.toString() || '');
       setAmount(editData.amount?.toString() || '');
-      setNotes(editData.notes || '');
+      
+      let initialNotes = '';
+      let initialPhotos = [];
+      if (editData.notes) {
+        try {
+          const parsed = JSON.parse(editData.notes);
+          if (parsed.text !== undefined || parsed.photoPaths !== undefined) {
+             initialNotes = parsed.text || '';
+             initialPhotos = parsed.photoPaths || [];
+          } else {
+             initialNotes = editData.notes;
+          }
+        } catch {
+          initialNotes = editData.notes;
+        }
+      }
+      setNotes(initialNotes);
+      setPhotoPaths(initialPhotos);
     } else {
       // Default for new entry
       setFormType('issue');
@@ -48,6 +70,7 @@ export default function LedgerEntryForm({
       setTouch('');
       setAmount('');
       setNotes('');
+      setPhotoPaths([]);
     }
     setError('');
   }, [editData, isOpen]);
@@ -58,6 +81,34 @@ export default function LedgerEntryForm({
       name.toLowerCase().includes(partyName.toLowerCase()) &&
       name.toLowerCase() !== partyName.toLowerCase()
   );
+
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    setUploadingImage(true);
+    setError('');
+    
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('notes_photos')
+        .upload(filePath, file);
+        
+      if (uploadError) throw uploadError;
+      
+      setPhotoPaths(prev => [...prev, filePath]);
+    } catch (err) {
+      console.error('Upload error:', err);
+      setError('Failed to upload image. Make sure bucket is set up as Private in Supabase policies.');
+    } finally {
+      setUploadingImage(false);
+      e.target.value = ''; // reset file input
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -86,6 +137,14 @@ export default function LedgerEntryForm({
 
     setLoading(true);
     try {
+      let finalNotes = notes.trim() || null;
+      if (photoPaths.length > 0) {
+        finalNotes = JSON.stringify({
+          text: notes.trim(),
+          photoPaths: photoPaths,
+        });
+      }
+
       const entry = {
         date,
         type: formType,
@@ -95,7 +154,7 @@ export default function LedgerEntryForm({
         touch: formType !== 'payment' ? parseFloat(touch) : null,
         fine: formType !== 'payment' ? parseFloat(finePreview) : null,
         amount: formType === 'payment' ? parseFloat(amount) : null,
-        notes: notes.trim() || null,
+        notes: finalNotes,
       };
 
       await onSubmit(entry);
@@ -284,7 +343,7 @@ export default function LedgerEntryForm({
                   </div>
                 </>
               )}
-              {/* Notes */}
+              {/* Notes & Photos */}
               <div className="form-group full-width">
                 <label htmlFor="entry-notes">Notes</label>
                 <textarea
@@ -299,6 +358,41 @@ export default function LedgerEntryForm({
                     fontFamily: 'inherit',
                   }}
                 />
+              </div>
+
+              <div className="form-group full-width">
+                <label>Photos / Attachments</label>
+                {photoPaths.length > 0 && (
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                    {photoPaths.map((path, idx) => (
+                      <div key={idx} className="secure-image-placeholder">
+                        <ImageIcon size={16} />
+                        <span>Photo attached ({idx + 1})</span>
+                        <button 
+                          type="button" 
+                          onClick={() => setPhotoPaths(prev => prev.filter((_, i) => i !== idx))} 
+                          style={{ background: 'transparent', border: 'none', color: 'var(--error)', cursor: 'pointer', marginLeft: '0.5rem', display: 'flex', alignItems: 'center' }}
+                        >
+                          <X size={14} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                <div>
+                  <label className="btn btn-secondary" style={{ width: 'max-content', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {uploadingImage ? <Loader2 size={16} className="spinning" /> : <ImageIcon size={16} />}
+                    {uploadingImage ? 'Uploading...' : 'Add Photo'}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      style={{ display: 'none' }} 
+                      disabled={uploadingImage}
+                      onChange={handlePhotoUpload} 
+                    />
+                  </label>
+                </div>
               </div>
             </div>
           </div>

@@ -4,6 +4,20 @@ import { useParties } from '../hooks/useParties';
 import LedgerEntryForm from '../components/LedgerEntryForm';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Toast from '../components/Toast';
+import SecureImage from '../components/SecureImage';
+
+const parseNotes = (notesStr) => {
+  if (!notesStr) return { text: '', photos: [] };
+  try {
+    const parsed = JSON.parse(notesStr);
+    if (parsed.text !== undefined || parsed.photoPaths !== undefined) {
+      return { text: parsed.text || '', photos: parsed.photoPaths || [] };
+    }
+  } catch (e) {
+    // legacy 
+  }
+  return { text: notesStr, photos: [] };
+};
 import {
   Plus,
   Search,
@@ -263,8 +277,24 @@ export default function LedgerPage() {
                           ? `₹${parseFloat(entry.amount).toLocaleString('en-IN')}`
                           : '—'}
                       </td>
-                      <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem', maxWidth: '120px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                        {entry.notes || '—'}
+                      <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem', maxWidth: '160px' }}>
+                        {(() => {
+                          const { text, photos } = parseNotes(entry.notes);
+                          if (!text && photos.length === 0) return '—';
+                          
+                          return (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                              {text && <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{text}</div>}
+                              {photos.length > 0 && (
+                                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', paddingTop: '2px' }}>
+                                  {photos.map((path, idx) => (
+                                    <SecureImage key={idx} path={path} size={32} />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td>
                         <div className="table-actions">
