@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { BarChart3, Users, Calendar, Gem, Download, Layers } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function ReportsPage() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('party');
@@ -36,9 +38,12 @@ export default function ReportsPage() {
     partyAgg[e.party_name].entries += 1;
     if (e.type === 'payment') {
       partyAgg[e.party_name].payments += parseFloat(e.amount || 0);
-    } else {
+    } else if (e.type === 'issue') {
       partyAgg[e.party_name].weight += parseFloat(e.weight || 0);
       partyAgg[e.party_name].fine += parseFloat(e.fine || 0);
+    } else if (e.type === 'receive') {
+      partyAgg[e.party_name].weight -= parseFloat(e.weight || 0);
+      partyAgg[e.party_name].fine -= parseFloat(e.fine || 0);
     }
   });
 
@@ -57,9 +62,12 @@ export default function ReportsPage() {
     monthAgg[month].entries += 1;
     if (e.type === 'payment') {
       monthAgg[month].payments += parseFloat(e.amount || 0);
-    } else {
+    } else if (e.type === 'issue') {
       monthAgg[month].weight += parseFloat(e.weight || 0);
       monthAgg[month].fine += parseFloat(e.fine || 0);
+    } else if (e.type === 'receive') {
+      monthAgg[month].weight -= parseFloat(e.weight || 0);
+      monthAgg[month].fine -= parseFloat(e.fine || 0);
     }
   });
 
@@ -67,22 +75,6 @@ export default function ReportsPage() {
     .map(([month, data]) => ({ month, ...data }))
     .sort((a, b) => b.month.localeCompare(a.month));
 
-  // Quantity-wise aggregation
-  const quantityAgg = {};
-  entries.forEach((e) => {
-    if (!e.quantity || e.type === 'payment') return;
-    const name = e.quantity;
-    if (!quantityAgg[name]) {
-      quantityAgg[name] = { entries: 0, weight: 0, fine: 0 };
-    }
-    quantityAgg[name].entries += 1;
-    quantityAgg[name].weight += parseFloat(e.weight || 0);
-    quantityAgg[name].fine += parseFloat(e.fine || 0);
-  });
-
-  const quantitySummary = Object.entries(quantityAgg)
-    .map(([name, data]) => ({ name, ...data }))
-    .sort((a, b) => b.fine - a.fine);
 
   // Stock Ledger aggregation
   const stockAgg = {
@@ -128,9 +120,6 @@ export default function ReportsPage() {
         ['Weight (gm)', stockAgg.receiveWeight.toFixed(3), stockAgg.issueWeight.toFixed(3), stockSummary.netWeight.toFixed(3)],
         ['Fine Weight (gm)', stockAgg.receiveFine.toFixed(3), stockAgg.issueFine.toFixed(3), stockSummary.netFine.toFixed(3)],
       ];
-    } else {
-      headers = ['Quantity', 'Entries', 'Weight (gm)', 'Fine (gm)'];
-      rows = quantitySummary.map((o) => [o.name, o.entries, o.weight.toFixed(3), o.fine.toFixed(3)]);
     }
 
     const csv = [headers, ...rows].map((row) => row.map((v) => `"${v}"`).join(',')).join('\n');
@@ -199,13 +188,7 @@ export default function ReportsPage() {
             <Calendar size={14} style={{ marginRight: '0.3rem', verticalAlign: 'middle' }} />
             Monthly
           </button>
-          <button
-            className={`type-tab ${activeTab === 'quantity' ? 'active' : ''}`}
-            onClick={() => setActiveTab('quantity')}
-          >
-            <Gem size={14} style={{ marginRight: '0.3rem', verticalAlign: 'middle' }} />
-            Quantity-wise
-          </button>
+
           <button
             className={`type-tab ${activeTab === 'stock' ? 'active' : ''}`}
             onClick={() => setActiveTab('stock')}
@@ -240,8 +223,12 @@ export default function ReportsPage() {
                 ) : (
                   <>
                     {partySummary.map((p) => (
-                      <tr key={p.name}>
-                        <td style={{ fontWeight: 500 }}>{p.name}</td>
+                      <tr 
+                        key={p.name}
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => navigate('/parties', { state: { selectedPartyName: p.name } })}
+                      >
+                        <td style={{ fontWeight: 500, color: 'var(--gold-300)' }}>{p.name}</td>
                         <td>{p.entries}</td>
                         <td>{p.weight.toFixed(3)}</td>
                         <td style={{ color: 'var(--gold-300)', fontWeight: 600 }}>{p.fine.toFixed(3)}</td>
@@ -309,41 +296,6 @@ export default function ReportsPage() {
         </div>
       )}
 
-      {/* Quantity-wise Report */}
-      {activeTab === 'quantity' && (
-        <div className="table-container">
-          <div style={{ overflowX: 'auto' }}>
-            <table>
-              <thead>
-                <tr>
-                  <th>Quantity</th>
-                  <th>Entries</th>
-                  <th>Total Weight (gm)</th>
-                  <th>Total Fine (gm)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {quantitySummary.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="table-empty">
-                      <p>No quantity data available.</p>
-                    </td>
-                  </tr>
-                ) : (
-                  quantitySummary.map((o) => (
-                    <tr key={o.name}>
-                      <td style={{ fontWeight: 500 }}>{o.name}</td>
-                      <td>{o.entries}</td>
-                      <td>{o.weight.toFixed(3)}</td>
-                      <td style={{ color: 'var(--gold-300)', fontWeight: 600 }}>{o.fine.toFixed(3)}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
       {/* Stock Ledger Report */}
       {activeTab === 'stock' && (

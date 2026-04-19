@@ -284,23 +284,22 @@ export default function LedgerEntryForm({
                   </div>
                 </>
               )}
-            </div>
-
-            {/* Notes */}
-            <div className="form-group full-width">
-              <label htmlFor="entry-notes">Notes</label>
-              <textarea
-                id="entry-notes"
-                placeholder="Add any notes (optional)"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={2}
-                style={{
-                  resize: 'vertical',
-                  minHeight: '2.5rem',
-                  fontFamily: 'inherit',
-                }}
-              />
+              {/* Notes */}
+              <div className="form-group full-width">
+                <label htmlFor="entry-notes">Notes</label>
+                <textarea
+                  id="entry-notes"
+                  placeholder="Add any notes (optional)"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  rows={2}
+                  style={{
+                    resize: 'vertical',
+                    minHeight: '2.5rem',
+                    fontFamily: 'inherit',
+                  }}
+                />
+              </div>
             </div>
           </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParties } from '../hooks/useParties';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ConfirmDialog from '../components/ConfirmDialog';
 import Toast from '../components/Toast';
 import {
@@ -39,6 +40,21 @@ export default function PartiesPage() {
 
   // Party-wise stats
   const [partyStats, setPartyStats] = useState({});
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (parties.length > 0 && location.state?.selectedPartyName) {
+      const targetPartyName = location.state.selectedPartyName;
+      const tParty = parties.find((p) => p.name === targetPartyName);
+      if (tParty && !selectedParty) {
+        openPartyDetail(tParty);
+        // Clear state to avoid reopening if navigating backwards
+        navigate(location.pathname, { replace: true });
+      }
+    }
+  }, [parties, location.state, selectedParty, navigate, location.pathname]);
 
   useEffect(() => {
     if (!user) return;

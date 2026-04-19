@@ -1423,6 +1423,15 @@ tbody tr:last-child td {
 
   .modal-footer {
     padding: 0.85rem 1.25rem;
+    justify-content: flex-start;
+  }
+
+  /* Form inputs slightly shorter on mobile to prevent overflow */
+  .form-group input, 
+  .form-group select, 
+  .form-group textarea {
+    max-width: 93%;
+    box-sizing: border-box !important;
   }
 
   /* Toast moves to top on mobile so keyboard doesn't cover it */
