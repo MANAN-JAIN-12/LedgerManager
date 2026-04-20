@@ -171,26 +171,32 @@ export default function LedgerPage() {
             ))}
           </div>
 
-          <div className="table-filter">
-            <span className="table-filter-label">From</span>
-            <input
-              id="filter-date-from"
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-            />
-            <span className="table-filter-label">To</span>
-            <input
-              id="filter-date-to"
-              type="date"
-              value={dateTo}
-              onChange={(e) => setDateTo(e.target.value)}
-            />
+          <div className="table-filter" style={{ width: '100%', display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1, minWidth: '120px' }}>
+              <span className="table-filter-label" style={{ fontSize: '0.75rem' }}>From</span>
+              <input
+                id="filter-date-from"
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                style={{ width: '100%' }}
+              />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem', flex: 1, minWidth: '120px' }}>
+              <span className="table-filter-label" style={{ fontSize: '0.75rem' }}>To</span>
+              <input
+                id="filter-date-to"
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                style={{ width: '100%' }}
+              />
+            </div>
             {(dateFrom || dateTo) && (
               <button
                 className="btn btn-ghost btn-sm"
                 onClick={() => { setDateFrom(''); setDateTo(''); }}
-                style={{ fontSize: '0.75rem', color: 'var(--error)' }}
+                style={{ color: 'var(--error)', marginBottom: '0.2rem' }}
               >
                 Clear
               </button>

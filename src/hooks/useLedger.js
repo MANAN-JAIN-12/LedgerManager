@@ -104,9 +104,12 @@ export function useLedger() {
     (acc, entry) => {
       if (entry.type === 'payment') {
         acc.totalPayment += parseFloat(entry.amount || 0);
-      } else {
+      } else if (entry.type === 'receive') {
         acc.totalWeight += parseFloat(entry.weight || 0);
         acc.totalFine += parseFloat(entry.fine || 0);
+      } else if (entry.type === 'issue') {
+        acc.totalWeight -= parseFloat(entry.weight || 0);
+        acc.totalFine -= parseFloat(entry.fine || 0);
       }
       acc.totalEntries += 1;
       return acc;

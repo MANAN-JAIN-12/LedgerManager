@@ -38,10 +38,10 @@ export default function ReportsPage() {
     partyAgg[e.party_name].entries += 1;
     if (e.type === 'payment') {
       partyAgg[e.party_name].payments += parseFloat(e.amount || 0);
-    } else if (e.type === 'issue') {
+    } else if (e.type === 'receive') {
       partyAgg[e.party_name].weight += parseFloat(e.weight || 0);
       partyAgg[e.party_name].fine += parseFloat(e.fine || 0);
-    } else if (e.type === 'receive') {
+    } else if (e.type === 'issue') {
       partyAgg[e.party_name].weight -= parseFloat(e.weight || 0);
       partyAgg[e.party_name].fine -= parseFloat(e.fine || 0);
     }
@@ -62,10 +62,10 @@ export default function ReportsPage() {
     monthAgg[month].entries += 1;
     if (e.type === 'payment') {
       monthAgg[month].payments += parseFloat(e.amount || 0);
-    } else if (e.type === 'issue') {
+    } else if (e.type === 'receive') {
       monthAgg[month].weight += parseFloat(e.weight || 0);
       monthAgg[month].fine += parseFloat(e.fine || 0);
-    } else if (e.type === 'receive') {
+    } else if (e.type === 'issue') {
       monthAgg[month].weight -= parseFloat(e.weight || 0);
       monthAgg[month].fine -= parseFloat(e.fine || 0);
     }
@@ -203,7 +203,7 @@ export default function ReportsPage() {
       {activeTab === 'party' && (
         <div className="table-container">
           <div style={{ overflowX: 'auto' }}>
-            <table>
+            <table className="mobile-cards">
               <thead>
                 <tr>
                   <th>Party Name</th>
@@ -228,11 +228,11 @@ export default function ReportsPage() {
                         style={{ cursor: 'pointer' }}
                         onClick={() => navigate('/parties', { state: { selectedPartyName: p.name } })}
                       >
-                        <td style={{ fontWeight: 500, color: 'var(--gold-300)' }}>{p.name}</td>
-                        <td>{p.entries}</td>
-                        <td>{p.weight.toFixed(3)}</td>
-                        <td style={{ color: 'var(--gold-300)', fontWeight: 600 }}>{p.fine.toFixed(3)}</td>
-                        <td>
+                        <td data-label="Party Name" style={{ fontWeight: 500, color: 'var(--gold-300)' }}>{p.name}</td>
+                        <td data-label="Entries">{p.entries}</td>
+                        <td data-label="Total Weight (gm)">{p.weight.toFixed(3)}</td>
+                        <td data-label="Total Fine (gm)" style={{ color: 'var(--gold-300)', fontWeight: 600 }}>{p.fine.toFixed(3)}</td>
+                        <td data-label="Payments (₹)">
                           {p.payments > 0
                             ? `₹${p.payments.toLocaleString('en-IN')}`
                             : '—'}
@@ -240,11 +240,11 @@ export default function ReportsPage() {
                       </tr>
                     ))}
                     <tr style={{ background: 'rgba(212,165,116,0.04)', fontWeight: 600 }}>
-                      <td style={{ color: 'var(--text-muted)' }}>TOTAL</td>
-                      <td>{partyTotals.entries}</td>
-                      <td>{partyTotals.weight.toFixed(3)}</td>
-                      <td style={{ color: 'var(--gold-300)' }}>{partyTotals.fine.toFixed(3)}</td>
-                      <td>₹{partyTotals.payments.toLocaleString('en-IN')}</td>
+                      <td data-label="Party Name" style={{ color: 'var(--text-muted)' }}>TOTAL</td>
+                      <td data-label="Entries">{partyTotals.entries}</td>
+                      <td data-label="Total Weight (gm)">{partyTotals.weight.toFixed(3)}</td>
+                      <td data-label="Total Fine (gm)" style={{ color: 'var(--gold-300)' }}>{partyTotals.fine.toFixed(3)}</td>
+                      <td data-label="Payments (₹)">₹{partyTotals.payments.toLocaleString('en-IN')}</td>
                     </tr>
                   </>
                 )}
@@ -258,7 +258,7 @@ export default function ReportsPage() {
       {activeTab === 'month' && (
         <div className="table-container">
           <div style={{ overflowX: 'auto' }}>
-            <table>
+            <table className="mobile-cards">
               <thead>
                 <tr>
                   <th>Month</th>
@@ -278,11 +278,11 @@ export default function ReportsPage() {
                 ) : (
                   monthSummary.map((m) => (
                     <tr key={m.month}>
-                      <td style={{ fontWeight: 500 }}>{formatMonth(m.month)}</td>
-                      <td>{m.entries}</td>
-                      <td>{m.weight.toFixed(3)}</td>
-                      <td style={{ color: 'var(--gold-300)', fontWeight: 600 }}>{m.fine.toFixed(3)}</td>
-                      <td>
+                      <td data-label="Month" style={{ fontWeight: 500 }}>{formatMonth(m.month)}</td>
+                      <td data-label="Entries">{m.entries}</td>
+                      <td data-label="Total Weight (gm)">{m.weight.toFixed(3)}</td>
+                      <td data-label="Total Fine (gm)" style={{ color: 'var(--gold-300)', fontWeight: 600 }}>{m.fine.toFixed(3)}</td>
+                      <td data-label="Payments (₹)">
                         {m.payments > 0
                           ? `₹${m.payments.toLocaleString('en-IN')}`
                           : '—'}
@@ -301,7 +301,7 @@ export default function ReportsPage() {
       {activeTab === 'stock' && (
         <div className="table-container">
           <div style={{ overflowX: 'auto' }}>
-            <table>
+            <table className="mobile-cards">
               <thead>
                 <tr>
                   <th>Metric</th>
@@ -312,26 +312,26 @@ export default function ReportsPage() {
               </thead>
               <tbody>
                 <tr>
-                  <td style={{ fontWeight: 500 }}>Quantity</td>
-                  <td style={{ color: 'var(--error)' }}>{stockAgg.receiveQuantity}</td>
-                  <td style={{ color: 'var(--warning)' }}>{stockAgg.issueQuantity}</td>
-                  <td style={{ fontWeight: 600, color: stockSummary.netQuantity >= 0 ? 'var(--gold-300)' : 'var(--error)' }}>
+                  <td data-label="Metric" style={{ fontWeight: 500 }}>Quantity</td>
+                  <td data-label="Total Receive" style={{ color: 'var(--error)' }}>{stockAgg.receiveQuantity}</td>
+                  <td data-label="Total Issue" style={{ color: 'var(--warning)' }}>{stockAgg.issueQuantity}</td>
+                  <td data-label="Net Balance" style={{ fontWeight: 600, color: stockSummary.netQuantity >= 0 ? 'var(--gold-300)' : 'var(--error)' }}>
                     {stockSummary.netQuantity}
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ fontWeight: 500 }}>Weight (gm)</td>
-                  <td style={{ color: 'var(--error)' }}>{stockAgg.receiveWeight.toFixed(3)}</td>
-                  <td style={{ color: 'var(--warning)' }}>{stockAgg.issueWeight.toFixed(3)}</td>
-                  <td style={{ fontWeight: 600, color: stockSummary.netWeight >= 0 ? 'var(--gold-300)' : 'var(--error)' }}>
+                  <td data-label="Metric" style={{ fontWeight: 500 }}>Weight (gm)</td>
+                  <td data-label="Total Receive" style={{ color: 'var(--error)' }}>{stockAgg.receiveWeight.toFixed(3)}</td>
+                  <td data-label="Total Issue" style={{ color: 'var(--warning)' }}>{stockAgg.issueWeight.toFixed(3)}</td>
+                  <td data-label="Net Balance" style={{ fontWeight: 600, color: stockSummary.netWeight >= 0 ? 'var(--gold-300)' : 'var(--error)' }}>
                     {stockSummary.netWeight.toFixed(3)}
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ fontWeight: 500 }}>Fine Weight (gm)</td>
-                  <td style={{ color: 'var(--error)' }}>{stockAgg.receiveFine.toFixed(3)}</td>
-                  <td style={{ color: 'var(--warning)' }}>{stockAgg.issueFine.toFixed(3)}</td>
-                  <td style={{ fontWeight: 600, color: stockSummary.netFine >= 0 ? 'var(--gold-300)' : 'var(--error)' }}>
+                  <td data-label="Metric" style={{ fontWeight: 500 }}>Fine Weight (gm)</td>
+                  <td data-label="Total Receive" style={{ color: 'var(--error)' }}>{stockAgg.receiveFine.toFixed(3)}</td>
+                  <td data-label="Total Issue" style={{ color: 'var(--warning)' }}>{stockAgg.issueFine.toFixed(3)}</td>
+                  <td data-label="Net Balance" style={{ fontWeight: 600, color: stockSummary.netFine >= 0 ? 'var(--gold-300)' : 'var(--error)' }}>
                     {stockSummary.netFine.toFixed(3)}
                   </td>
                 </tr>

@@ -82,19 +82,20 @@ export default function Layout({ children }) {
         </nav>
 
         <div className="sidebar-footer">
-          <div className="sidebar-user">
+          <div className="sidebar-user" style={{ marginBottom: '1rem' }}>
             <div className="sidebar-user-avatar">{userInitial}</div>
             <div className="sidebar-user-info">
               <div className="sidebar-user-email">{user?.email}</div>
             </div>
-            <button
-              className="btn btn-ghost btn-icon"
-              onClick={handleSignOut}
-              title="Sign Out"
-            >
-              <LogOut size={16} />
-            </button>
           </div>
+          <button
+            className="btn btn-secondary"
+            onClick={handleSignOut}
+            style={{ width: '100%', justifyContent: 'center' }}
+          >
+            <LogOut size={18} />
+            Sign Out
+          </button>
         </div>
       </aside>
 

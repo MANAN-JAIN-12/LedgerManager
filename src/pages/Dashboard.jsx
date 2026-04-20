@@ -157,7 +157,7 @@ export default function Dashboard() {
         </div>
 
         <div style={{ overflowX: 'auto' }}>
-          <table>
+          <table style={{ minWidth: '600px' }}>
             <thead>
               <tr>
                 <th>Date</th>

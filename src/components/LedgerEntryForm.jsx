@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { X, Image as ImageIcon, Loader2, Camera } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 
@@ -178,7 +178,7 @@ export default function LedgerEntryForm({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden', width: '100%', boxSizing: 'border-box' }}>
           <div className="modal-body">
             {error && <div className="login-error" style={{ marginBottom: '1rem' }}>{error}</div>}
 
@@ -319,7 +319,7 @@ export default function LedgerEntryForm({
                       }}
                     />
                     {finePreview && (
-                      <span className="fine-preview">
+                      <span className="fine-preview" style={{ wordBreak: 'break-word', display: 'block' }}>
                         {weight} × {touch}% = {finePreview}
                       </span>
                     )}
@@ -380,13 +380,26 @@ export default function LedgerEntryForm({
                   </div>
                 )}
                 
-                <div>
-                  <label className="btn btn-secondary" style={{ width: 'max-content', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <label className="btn btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap', flex: '0 1 auto' }}>
                     {uploadingImage ? <Loader2 size={16} className="spinning" /> : <ImageIcon size={16} />}
                     {uploadingImage ? 'Uploading...' : 'Add Photo'}
                     <input 
                       type="file" 
                       accept="image/*" 
+                      style={{ display: 'none' }} 
+                      disabled={uploadingImage}
+                      onChange={handlePhotoUpload} 
+                    />
+                  </label>
+                  
+                  <label className="btn btn-secondary" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem', whiteSpace: 'nowrap', flex: '0 1 auto' }}>
+                    {uploadingImage ? <Loader2 size={16} className="spinning" /> : <Camera size={16} />}
+                    {uploadingImage ? 'Uploading...' : 'Take Photo'}
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      capture="environment"
                       style={{ display: 'none' }} 
                       disabled={uploadingImage}
                       onChange={handlePhotoUpload} 
