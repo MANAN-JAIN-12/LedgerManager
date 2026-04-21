@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { X, Image as ImageIcon, Loader2, Camera } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import imageCompression from 'browser-image-compression';
 
 export default function LedgerEntryForm({
   isOpen,
@@ -90,13 +91,22 @@ export default function LedgerEntryForm({
     setError('');
     
     try {
-      const fileExt = file.name.split('.').pop();
+      // Compress the image down to ~100KB before uploading to save Supabase Quota
+      const options = {
+        maxSizeMB: 0.1, // Max ~100KB
+        maxWidthOrHeight: 1200, // Safe mobile viewing dimension
+        useWebWorker: true,
+      };
+      
+      const compressedFile = await imageCompression(file, options);
+
+      const fileExt = compressedFile.name ? compressedFile.name.split('.').pop() : 'jpeg';
       const fileName = `${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
       const filePath = `${user.id}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
         .from('notes_photos')
-        .upload(filePath, file);
+        .upload(filePath, compressedFile);
         
       if (uploadError) throw uploadError;
       
