@@ -1,0 +1,25 @@
+name: Keep Supabase Alive (Ping)
+
+on:
+  schedule:
+    # Runs at 00:00 every 3 days to prevent 7-day inactivity pause
+    - cron: '0 0 */3 * *'
+  workflow_dispatch: # Allows you to run this manually from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase Database
+        env:
+          # Your public Supabase URL and Anon Key
+          # (For open source projects, it's safer to move these to GitHub Secrets)
+          SUPABASE_URL: "https://gnlzpasjhmzhdquzicrh.supabase.co"
+          SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdubHpwYXNqaG16aGRxdXppY3JoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxMzk2NTQsImV4cCI6MjA5MTcxNTY1NH0.bFGNjxsgon3qG9AB4m07l4sVBAsc-saYeQiwwORvNk0"
+        run: |
+          echo "Pinging Supabase REST API..."
+          curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/parties?select=id&limit=1"
+          echo -e "\nPing successful! Your database activity has been registered."
